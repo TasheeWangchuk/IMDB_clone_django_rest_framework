@@ -1,12 +1,23 @@
 from rest_framework import serializers
-from watchlist_app.models import Movie
+from watchlist_app.models import WatchList,StreamPlatform,Review
 
-class MovieSerializer(serializers.ModelSerializer):
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        exclude =('watchlist',)
+
+class WatchListSerializer(serializers.ModelSerializer):
+    review = ReviewSerializer(many=True,read_only = True)
     # len_names = serializers.SerializerMethodField()
     class Meta:
-        model = Movie
-        fields = ('id', 'name', 'description', 'active', 'len_names')
+        model = WatchList
+        fields = ('id', 'title','storyline', 'active', 'created','platform','review')
         
+class StreamPlatformSerializer(serializers.ModelSerializer):
+    watchlist = WatchListSerializer(many=True, read_only=True)
+    class Meta:
+        model = StreamPlatform
+        fields = ('id', 'name', 'about', 'website','watchlist')
     # def get_len_names(self,object):
     #     return len(object.name)
         
@@ -21,14 +32,14 @@ class MovieSerializer(serializers.ModelSerializer):
     #     else:
     #         return value
 
-# class MovieSerializer(serializers.Serializer):
+# class WatchListSerializer(serializers.Serializer):
 #     id = serializers.IntegerField(read_only=True)
 #     name = serializers.CharField()
 #     description = serializers.CharField()
 #     active = serializers.BooleanField()
     
 #     def create(self,validated_data):
-#         Movie.objects.create(validated_data)
+#         WatchList.objects.create(validated_data)
     
 #     def update(self, instance, validated_data):
 #         instance.name = validated_data.get('name', instance.name)

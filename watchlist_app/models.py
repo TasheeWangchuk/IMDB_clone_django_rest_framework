@@ -1,6 +1,16 @@
 from django.db import models
 from django.core.validators import MinValueValidator,MaxValueValidator
+from django.conf import settings
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from rest_framework.authtoken.models import Token
+from django.contrib.auth.models import User
 
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_auth_token(sender, instance=None, created=False, **kwargs):
+    if created:
+        Token.objects.create(user=instance)
 
 class StreamPlatform(models.Model):
     name = models.CharField(max_length=50)
@@ -21,6 +31,7 @@ class WatchList(models.Model):
         return self.title
 
 class Review(models.Model):
+    review_user = models.ForeignKey(User, on_delete=models.CASCADE)
     rating = models.PositiveIntegerField(validators=[MinValueValidator(1),MaxValueValidator(5)])
     description = models.CharField(max_length=200,null=True)
     created = models.DateTimeField(auto_now_add=True)
